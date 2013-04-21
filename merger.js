@@ -1,74 +1,114 @@
 var jsdom = require('jsdom');
 
-function merge(err, window, $upperTable, $lowerTable, filter) {
-  var $ = window.jQuery;
+//JSON structure
+//[
+//  {
+//    category: '',
+//    imgSrc: '',
+//    name: '',
+//    level: '',
+//    dmgMin: '',
+//    dmgMax: '',
+//    aps: '',
+//    dps: '',
+//    armor: '',
+//    er: '',
+//    es: '',
+//    str: '',
+//    dex: '',
+//    int: ''
+//  }
+//]
 
-  $('tr', $upperTable).each(function(upperIndex) {
-    if(!$(this).hasClass('even_mod') && !$(this).hasClass('odd_mod') && upperIndex > 1) {
-      var $upperItem = $(this),
-          upperLevel = getColValue($, $(this), 2);
+function getWeapons($, itemType, $itemTable) {
+  var items = [];
   
-      $('tr', $lowerTable).each(function(lowerIndex) {
-        if(!$(this).hasClass('even_mod') && !$(this).hasClass('odd_mod') && lowerIndex > 1) {
-          var $lowerItem = $(this),
-              lowerLevel = getColValue($, $(this), 2);
-              passedTest = filter($, $(this));
-    
-          if(lowerLevel < upperLevel && passedTest) {
-              var $lowerMod = $lowerItem.next().html('<td colspan="4"></td><td colspan="2"></td><td></td>');
-              $upperItem.before($lowerItem);
-              $lowerItem.after($lowerMod);
-          }
-        }
-      });
-    }
+  $('tr:nth-child(1)', $itemTable).remove();
+  $('tr:nth-child(1)', $itemTable).remove();
+  
+  $('tr:even', $itemTable).each(function(i) {
+    var item = {};
+    item.category = itemType;
+    item.imgSrc = $('td:nth-child(1)', $(this)).children('img').attr('src');
+    item.name = $('td:nth-child(2)', $(this)).text();
+    item.level = $('td:nth-child(3)', $(this)).text();
+    item.dmgMin = $('td:nth-child(4)', $(this)).text().split(' to ')[0];
+    item.dmgMax = $('td:nth-child(4)', $(this)).text().split(' to ')[1];
+    item.aps = $('td:nth-child(5)', $(this)).text();
+    item.dps = $('td:nth-child(6)', $(this)).text();
+    item.armor = '0';
+    item.er = '0';
+    item.es = '0';
+    item.str = $('td:nth-child(7)', $(this)).text();
+    item.dex = $('td:nth-child(8)', $(this)).text();
+    item.int = $('td:nth-child(9)', $(this)).text();
+    items.push(item);
   });
-  return $upperTable.clone().wrap("<div></div>").parent().html();
+  return items;
 }
 
-function getColValue($, $ctx, colNum) {
-  var intValue = -1;
-  $('td', $ctx).each(function(i) { if(i == colNum) intValue = parseInt($(this).text()); });
-  return intValue;
+function getArmorItems($, itemType, $itemTable) {
+  var items = [];
+  
+  $('tr:nth-child(1)', $itemTable).remove();
+  $('tr:nth-child(1)', $itemTable).remove();
+  
+  $('tr:even', $itemTable).each(function(i) {
+    var item = {};
+    item.category = itemType;
+    item.imgSrc = $('td:nth-child(1)', $(this)).children('img').attr('src');
+    item.name = $('td:nth-child(2)', $(this)).text();
+    item.level = $('td:nth-child(3)', $(this)).text();
+    item.dmgMin = '0';
+    item.dmgMax = '0';
+    item.aps = '0';
+    item.dps = '0';
+    item.armor = $('td:nth-child(4)', $(this)).text();
+    item.er = $('td:nth-child(5)', $(this)).text();
+    item.es = $('td:nth-child(6)', $(this)).text();
+    item.str = $('td:nth-child(7)', $(this)).text();
+    item.dex = $('td:nth-child(8)', $(this)).text();
+    item.int = $('td:nth-child(9)', $(this)).text();
+    items.push(item);
+  });
+  return items;
 }
 
 exports.mergeAxesAndSwords = function(weaponPage, callback) {
   jsdom.env({
     html: weaponPage,
-    scripts: [
-      'http://code.jquery.com/jquery-1.8.3.min.js'
-    ]
-  }, function (err, window) {
-    var $upperContainer,
-        $lowerContainer;
-  
-    window.jQuery('.layoutBox1.layoutBoxFull.defaultTheme').each(function(i) {
-      if(i == 3) $upperContainer = window.jQuery('.layoutBoxContent', window.jQuery(this));
+    scripts: [ 'http://code.jquery.com/jquery-1.8.3.min.js' ]
+  },
+  function (err, window) {
+    var $ = window.jQuery,
+        itemses = [];
+    $('.layoutBox1.layoutBoxFull.defaultTheme').each(function(i) {
+      var itemType = $('.layoutBoxTitle', $(this)).text(),
+          $itemTable = $('.itemDataTable', $(this)),
+          weapons = getWeapons($, itemType, $itemTable);
+      for(var i = 0, len = weapons.length; i < len; i++) {
+        itemses.push(weapons[i]);
+      }
     });
-    window.jQuery('.layoutBox1.layoutBoxFull.defaultTheme').each(function(i) {
-      if(i == 5) $lowerContainer = window.jQuery('.layoutBoxContent', window.jQuery(this));
-    });
-
-    var mergedContainer = merge(err, window, $upperContainer, $lowerContainer, function(){return true;});
-
-    callback(mergedContainer);
+    callback(itemses);
   });
 };
 
-function energyShieldFilter($, $ctx) {
-  return getColValue($, $ctx, 5) == 0 && getColValue($, $ctx, 8) == 0;
-}
-
-exports.mergeAxesSwordsWithArmour = function(weaponTable, armourPage, callback) {
+exports.mergeAxesSwordsWithArmour = function(itemses, armourPage, callback) {
   jsdom.env({
     html: armourPage,
-    scripts: [
-      'http://code.jquery.com/jquery-1.8.3.min.js'
-    ]
-  }, function (err, window) {
-      window.jQuery('.layoutBox1.layoutBoxFull.defaultTheme .layoutBoxContent').each(function(i) {console.log(i);
-        weaponTable = merge(err, window, window.jQuery(weaponTable), window.jQuery(this), energyShieldFilter);
-      });
-      callback(weaponTable);
+    scripts: [ 'http://code.jquery.com/jquery-1.8.3.min.js' ]
+  },
+  function (err, window) {
+    var $ = window.jQuery;
+    $('.layoutBox1.layoutBoxFull.defaultTheme').each(function(i) {
+      var itemType = $('.layoutBoxTitle', $(this)).text(),
+          $itemTable = $('.itemDataTable', $(this)),
+          armorItems = getArmorItems($, itemType, $itemTable);
+      for(var i = 0, len = armorItems.length; i < len; i++) {
+        itemses.push(armorItems[i]);
+      }
+    });
+    callback(itemses);
   });
 };
