@@ -44,7 +44,7 @@ app.get('/style.css', function(req, res) {
   });
 });
 
-app.listen(8080);
+app.listen(3000);
 console.log('Niceurl server started on port 8080');
 
 function loadItems(req, res, sortingFunction) {
