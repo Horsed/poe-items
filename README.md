@@ -1,1 +1,1 @@
-#http://www.horsed.org:3000
+#http://www.horsed.org/scraper
