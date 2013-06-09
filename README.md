@@ -1,1 +1,1 @@
-#http://www.horsed.org/scraper
+#horsed.github.io/PoE-Items/0.11.0b.html
