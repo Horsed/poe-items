@@ -15,11 +15,11 @@ itemRetriever.loadWeapons(function(weaponPage) {
 });
 
 function writeJson(items) {
-  fs.writeFile("poe-item-overview.js", JSON.stringify(items, null, 4), function(err) {
+  fs.writeFile("items.js", "var poeItems = " + JSON.stringify(items, null, 4), function(err) {
     if(err) {
       console.log(err);
     } else {
-      console.log("poe-item-overview.js saved!");
+      console.log("items.js saved!");
     }
   });
 }
