@@ -4,7 +4,6 @@ var jsdom = require('jsdom');
 //[
 //  {
 //    category: '',
-//    imgSrc: '',
 //    name: '',
 //    level: '',
 //    dmgMin: '',
@@ -29,7 +28,6 @@ function getWeapons($, itemType, $itemTable) {
   $('tr:even', $itemTable).each(function(i) {
     var item = {};
     item.category = itemType;
-    item.imgSrc = $('td:nth-child(1)', $(this)).children('img').attr('src');
     item.name = $('td:nth-child(2)', $(this)).text();
     item.level = $('td:nth-child(3)', $(this)).text();
     item.dmgMin = $('td:nth-child(4)', $(this)).text().split(' to ')[0];
@@ -56,7 +54,6 @@ function getArmorItems($, itemType, $itemTable) {
   $('tr:even', $itemTable).each(function(i) {
     var item = {};
     item.category = itemType;
-    item.imgSrc = $('td:nth-child(1)', $(this)).children('img').attr('src');
     item.name = $('td:nth-child(2)', $(this)).text();
     item.level = $('td:nth-child(3)', $(this)).text();
     item.dmgMin = '0';
