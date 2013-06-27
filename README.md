@@ -1,3 +1,3 @@
 This site contains an overview of all Path of Exile items. It exits for the following versions of Path of Exile:
 
-[0.11.0b](horsed.github.io/PoE-Items/0.11.0b.html)
+current version is [0.11.1](http://horsed.github.io/poe-items)
